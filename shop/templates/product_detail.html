@@ -1,0 +1,194 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ product.name }} — {{ site.site_name|default:"NM Traders" }}</title>
+  <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="wrap topbar-inner">
+    <p>{{ site.topbar_text|default:"Free delivery on orders over Rs. 5,000" }}</p>
+    <span>
+      <i class="fa fa-phone"></i> {{ site.phone|default:"+977 9800000000" }} &nbsp;|&nbsp;
+      <a href="{{ site.facebook|default:'#' }}"><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="{{ site.instagram|default:'#' }}"><i class="fa-brands fa-instagram"></i></a>
+    </span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a href="{% url 'shop:home' %}" class="logo">
+      <span class="logo-mark">NM</span>
+      <span class="logo-text">{{ site.site_name|default:"NM Traders" }}<small>Furniture Store</small></span>
+    </a>
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+    <label for="menu-toggle" class="menu-btn">Menu</label>
+    <div class="menu">
+      <a href="{% url 'shop:home' %}">Home</a>
+      <a href="{% url 'shop:product_list' %}" class="on">Shop</a>
+      {% for c in nav_categories %}
+        <a href="{% url 'shop:category' c.slug %}">{{ c.name }}</a>
+      {% endfor %}
+    </div>
+    <div class="search">
+      <input type="search" placeholder="Search furniture…">
+      <a href="{% url 'shop:cart' %}" class="cart-pill">Cart <b>{{ cart_count|default:0 }}</b></a>
+    </div>
+  </div>
+</nav>
+
+<!-- PRODUCT DETAIL -->
+<section class="section">
+  <div class="wrap">
+
+    <!-- Breadcrumb -->
+    <p class="eyebrow" style="margin-bottom:16px;">
+      <a href="{% url 'shop:home' %}">Home</a> /
+      <a href="{% url 'shop:category' product.category.slug %}">{{ product.category.name }}</a> /
+      {{ product.name }}
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+      <!-- Image -->
+      <div>
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}"
+               style="width:100%;border-radius:12px;border:1px solid var(--line);background:var(--tile);">
+        {% else %}
+          <div class="img-ph" style="aspect-ratio:4/3;">{{ product.name }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Info -->
+      <div>
+        <p class="eyebrow">{{ product.category.name }}</p>
+        <h1>{{ product.name }}</h1>
+        <p class="lead" style="margin-top:12px;">
+          {{ product.description|default:"Premium quality furniture, handcrafted with care." }}
+        </p>
+
+        <div class="price-row" style="justify-content:flex-start;gap:12px;margin:24px 0;">
+          <div class="price">
+            <strong style="font-size:28px;color:var(--green);">Rs. {{ product.price }}</strong>
+            {% if product.old_price %}
+              <s style="font-size:16px;">Rs. {{ product.old_price }}</s>
+              <span class="tag tag-sale" style="position:static;display:inline-block;margin-left:8px;">
+                -{{ product.discount_percent }}%
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <p style="color:var(--muted);font-size:14px;margin-bottom:20px;">
+          <strong style="color:var(--fg);">Availability:</strong>
+          {% if product.stock > 0 %}
+            In stock ({{ product.stock }} units)
+          {% else %}
+            Out of stock
+          {% endif %}
+        </p>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          {% if product.stock > 0 %}
+            <a href="{% url 'shop:add_to_cart' product.id %}" class="btn btn-green">
+              🛒 Add to Cart
+            </a>
+          {% endif %}
+          <a href="{% url 'shop:product_list' %}" class="btn btn-light">Continue Shopping</a>
+        </div>
+
+        <!-- Trust badges -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:32px;padding-top:24px;border-top:1px solid var(--line);">
+          <div style="display:flex;gap:8px;align-items:center;font-size:13px;">
+            <i class="fa fa-truck" style="color:var(--green);font-size:18px;"></i>
+            <span>Free delivery over Rs. 5,000</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;font-size:13px;">
+            <i class="fa fa-undo" style="color:var(--green);font-size:18px;"></i>
+            <span>30-day easy returns</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;font-size:13px;">
+            <i class="fa fa-shield-alt" style="color:var(--green);font-size:18px;"></i>
+            <span>2-year warranty</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;font-size:13px;">
+            <i class="fa fa-headset" style="color:var(--green);font-size:18px;"></i>
+            <span>24/7 support</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- RELATED PRODUCTS -->
+{% if related %}
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>You may also like</h2>
+    </div>
+    <div class="grid">
+      {% for p in related %}
+        <div class="card">
+          <a href="{% url 'shop:product_detail' p.slug %}" style="color:inherit;text-decoration:none;">
+            <div class="card-img">
+              {% if p.old_price %}<span class="tag tag-sale">-{{ p.discount_percent }}%</span>
+              {% elif p.badge %}<span class="tag">{{ p.badge }}</span>{% endif %}
+              {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}">
+              {% else %}<div class="img-ph">{{ p.name }}</div>{% endif %}
+            </div>
+            <h3>{{ p.name }}</h3>
+            <p class="cat-name">{{ p.category.name }}</p>
+          </a>
+          <div class="price-row">
+            <div class="price">
+              <strong>Rs. {{ p.price }}</strong>
+              {% if p.old_price %}<s>Rs. {{ p.old_price }}</s>{% endif %}
+            </div>
+            <a href="{% url 'shop:add_to_cart' p.id %}" class="add">+</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div>
+      <p class="footer-brand">{{ site.site_name|default:"NM Traders" }}<span>.</span></p>
+      <p>Premium furniture for every room.</p>
+    </div>
+    <div>
+      <strong>Categories</strong>
+      <ul>
+        {% for c in nav_categories %}
+          <li><a href="{% url 'shop:category' c.slug %}">{{ c.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <strong>Get in Touch</strong>
+      <p>📍 {{ site.address|default:"123, Kathmandu, Nepal" }}</p>
+      <p>✉ {{ site.email|default:"info@nmtraders.com" }}</p>
+      <p>📞 {{ site.phone|default:"+977 9800000000" }}</p>
+    </div>
+  </div>
+  <div class="copyright">© {% now "Y" %} {{ site.site_name|default:"NM Traders" }}</div>
+</footer>
+
+</body>
+</html>

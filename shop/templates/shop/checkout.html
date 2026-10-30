@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout — {{ site.site_name|default:"NM Traders" }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+    .payment-option {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .payment-option:hover { border-color: #111; background: #fafafa; }
+    .payment-option input[type="radio"] { margin-right: 10px; accent-color: #111; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav style="background: #fff; border-bottom: 1px solid #eee; padding: 15px 0;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center;">
+    <a href="{% url 'shop:home' %}" style="text-decoration: none; color: #111; font-size: 24px; font-weight: 700; font-family: 'Playfair Display', serif;">
+      NM Traders.
+    </a>
+    <a href="{% url 'shop:cart' %}" style="text-decoration: none; color: #666; font-size: 14px;">← Back to Cart</a>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<div style="background: #f4f4f4; padding: 40px 0; text-align: center; border-bottom: 1px solid #eee;">
+  <h1 style="font-size: 32px; margin-bottom: 10px;">Secure Checkout</h1>
+  <p style="color: #666;">Complete your order by choosing a payment method below.</p>
+</div>
+
+<!-- CHECKOUT CONTENT -->
+<div style="max-width: 1000px; margin: 50px auto; padding: 0 15px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px;">
+  
+  <!-- LEFT: Payment Options -->
+  <div>
+    <h3 style="font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Select Payment Method</h3>
+    
+    <form action="#" method="POST">
+      {% csrf_token %}
+      
+      <!-- QR Payment -->
+      <label class="payment-option" style="display: block;">
+        <input type="radio" name="payment_method" value="qr" checked>
+        <strong style="font-size: 15px;">Scan QR Code (Fonepay / eSewa)</strong>
+        <p style="font-size: 13px; color: #666; margin-top: 5px; margin-left: 25px;">Scan the QR code to pay directly from your mobile banking app.</p>
+        
+        <div style="text-align: center; margin-top: 15px;">
+          {% if payment_qr %}
+            <img src="{{ payment_qr.qr_image.url }}" alt="Payment QR" style="width: 180px; border-radius: 8px; border: 1px solid #eee; padding: 10px;">
+          {% else %}
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=NMTradersPayment" alt="Placeholder QR" style="width: 180px; border-radius: 8px; border: 1px solid #eee; padding: 10px;">
+            <p style="font-size: 12px; color: #d32f2f; margin-top: 5px;">(Upload your QR in the dashboard)</p>
+          {% endif %}
+        </div>
+      </label>
+
+      <!-- eSewa -->
+      <label class="payment-option" style="display: block;">
+        <input type="radio" name="payment_method" value="esewa">
+        <strong style="font-size: 15px;">eSewa Wallet</strong>
+        <p style="font-size: 13px; color: #666; margin-top: 5px; margin-left: 25px;">Send money to <strong>9800000000</strong> (NM Traders).</p>
+      </label>
+
+      <!-- Bank Transfer -->
+      <label class="payment-option" style="display: block;">
+        <input type="radio" name="payment_method" value="bank">
+        <strong style="font-size: 15px;">Bank Transfer</strong>
+        <div style="font-size: 13px; color: #666; margin-top: 5px; margin-left: 25px; line-height: 1.6;">
+          Bank: Nabil Bank<br>
+          Account Name: NM Traders<br>
+          Account No: 1234567890123<br>
+          Branch: Kathmandu
+        </div>
+      </label>
+
+      <button type="submit" style="width: 100%; background: #111; color: #fff; padding: 15px; border: none; border-radius: 4px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px;">
+        I Have Paid / Confirm Order
+      </button>
+    </form>
+  </div>
+
+  <!-- RIGHT: Order Summary -->
+  <div style="background: #f9f9f9; padding: 30px; border-radius: 8px; border: 1px solid #eee; height: fit-content;">
+    <h3 style="font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Order Summary</h3>
+    
+    <!-- Order ID -->
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px;">
+      <span style="color: #666;">Order Reference:</span>
+      <strong>{{ order_id }}</strong>
+    </div>
+
+    <!-- Items List -->
+    <div style="margin-bottom: 20px;">
+      {% for item in items %}
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px;">
+          <div>
+            <span style="font-weight: 500;">{{ item.qty }}x</span> {{ item.product.name }}
+          </div>
+          <span style="font-weight: 600;">Rs. {{ item.subtotal }}</span>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Total -->
+    <div style="display: flex; justify-content: space-between; border-top: 1px solid #ddd; padding-top: 15px; margin-bottom: 25px;">
+      <strong style="font-size: 16px;">Total Due</strong>
+      <strong style="font-size: 20px;">Rs. {{ total }}</strong>
+    </div>
+
+    <!-- Download Statement Button -->
+    <button onclick="window.print()" style="width: 100%; background: #fff; color: #111; border: 1px solid #111; padding: 12px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;">
+      <i class="fa fa-download"></i> Download Statement
+    </button>
+    <p style="text-align: center; font-size: 11px; color: #888; margin-top: 10px;">You can save this page as a PDF receipt.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer style="text-align: center; padding: 30px; border-top: 1px solid #eee; font-size: 13px; color: #777;">
+  © {% now "Y" %} NM Traders. Secure Checkout.
+</footer>
+
+</body>
+</html>

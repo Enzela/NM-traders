@@ -1,0 +1,343 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{{ site.site_name|default:"NM Traders" }} — Furniture</title>
+
+  <!-- GOOGLE FONTS -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <style>
+    body { font-family: 'Inter', sans-serif !important; color: #333; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif !important; }
+  </style>
+</head>
+
+<body>
+  
+
+<!-- MESSAGES (Shows errors or success alerts) -->
+{% if messages %}
+  <div style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;">
+    {% for message in messages %}
+      <div style="padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; 
+                  {% if message.tags == 'success' %} background: #e8f5e9; color: #2e7d32; border-left: 5px solid #2e7d32; 
+                  {% else %} background: #ffebee; color: #c62828; border-left: 5px solid #c62828; {% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- NAVIGATION -->
+
+<!-- NAVIGATION -->
+<nav style="background: #fff; border-bottom: 1px solid #eee; padding: 15px 0;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+    
+    <!-- LOGO -->
+    <a href="{% url 'shop:home' %}" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #111;">
+      <span style="background: #111; color: #fff; padding: 8px 12px; border-radius: 4px; font-weight: 700; font-size: 18px; font-family: 'Inter', sans-serif;">NM</span>
+      <span style="display: flex; flex-direction: column; font-weight: 700; font-size: 22px; line-height: 1.1; font-family: 'Playfair Display', serif;">
+        NM Traders
+        <small style="font-size: 9px; color: #777; font-family: 'Inter', sans-serif; letter-spacing: 2px; text-transform: uppercase; font-weight: 400;">Furniture Store</small>
+      </span>
+    </a>
+
+    <!-- CENTERED MENU -->
+    <div class="menu" style="display: flex; gap: 25px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-inline: auto;">
+      <a href="{% url 'shop:home' %}" style="color: #111; text-decoration: none; border-bottom: 2px solid #111; padding-bottom: 5px;">Home</a>
+      <a href="{% url 'shop:product_list' %}" style="color: #666; text-decoration: none; padding-bottom: 5px;">Shop</a>
+      <a href="#" style="color: #666; text-decoration: none; padding-bottom: 5px;">Living Room</a>
+      <a href="#" style="color: #666; text-decoration: none; padding-bottom: 5px;">Bedroom</a>
+      <a href="#" style="color: #666; text-decoration: none; padding-bottom: 5px;">Sofa</a>
+      <a href="#" style="color: #666; text-decoration: none; padding-bottom: 5px;">Dining Room</a>
+      <a href="#" style="color: #666; text-decoration: none; padding-bottom: 5px;">Home Office</a>
+      <a href="#" style="color: #666; text-decoration: none; padding-bottom: 5px;">Storage</a>
+    </div>
+
+    <!-- RIGHT SIDE ACTIONS -->
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <!-- Search -->
+      <form action="{% url 'shop:product_list' %}" method="GET" style="display: flex; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 5px;">
+        <input type="search" name="q" placeholder="Search furniture..." style="border: none; background: transparent; outline: none; font-size: 13px; width: 150px; color: #333; font-family: 'Inter', sans-serif;">
+        <button type="submit" style="background: none; border: none; cursor: pointer; color: #666; font-size: 14px;"><i class="fa fa-search"></i></button>
+      </form>
+
+      <!-- Cart -->
+      <a href="{% url 'shop:cart' %}" style="text-decoration: none; color: #111; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+        <i class="fa fa-shopping-cart"></i>
+        Cart <span style="background: #111; color: #fff; width: 18px; height: 18px; display: inline-grid; place-items: center; border-radius: 50%; font-size: 10px; font-family: 'Inter', sans-serif;">{{ cart_count|default:0 }}</span>
+      </a>
+
+      <!-- AUTHENTICATION LOGIC -->
+      {% if request.user.is_authenticated %}
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <span style="font-size: 13px; font-weight: 600; color: #111;">Hi, {{ request.user.username }}</span>
+          
+          {% if request.user.is_staff %}
+            <a href="{% url 'shop:admin_dashboard' %}" style="background: #433a3a; color: #fff; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+              <i class="fa-solid fa-gauge"></i> Dashboard
+            </a>
+          {% endif %}
+          
+          <a href="{% url 'shop:logout' %}" style="color: #d32f2f; font-size: 13px; font-weight: 600; text-decoration: none;">Logout</a>
+        </div>
+      {% else %}
+        <!-- FIXED: Changed to direct links instead of Javascript popup -->
+        <div style="display: flex; gap: 10px;">
+          <a href="{% url 'shop:login' %}" style="background: transparent; color: #111; border: 1px solid #111; padding: 8px 20px; border-radius: 4px; font-size: 12px; font-weight: 600; text-decoration: none;">
+            Login
+          </a>
+          <a href="{% url 'shop:register' %}" style="background: #111; color: #fff; padding: 8px 20px; border-radius: 4px; font-size: 12px; font-weight: 600; text-decoration: none;">
+            Sign Up
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section style="background: #f3f1eb; padding: 80px 0; border-bottom: 1px solid #e0dcd3;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 300px;">
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 15px; font-weight: 500;">UP TO 50% OFF</p>
+      <h1 style="font-size: 64px; line-height: 1.1; font-weight: 700; color: #111; margin-bottom: 20px;">SUMMER<br>COLLECTIONS</h1>
+      <p style="font-size: 15px; color: #555; line-height: 1.6; max-width: 400px; margin-bottom: 30px;">Furniture that feels like home. Handpicked pieces for every room.</p>
+      <a href="{% url 'shop:product_list' %}" style="display: inline-block; padding: 12px 30px; border: 1px solid #111; color: #111; text-decoration: none; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s;" onmouseover="this.style.background='#111'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#111';">SHOP NOW</a>
+    </div>
+    <div style="flex: 1; min-width: 300px; display: flex; justify-content: flex-end;">
+      <div style="width: 100%; max-width: 500px; background: #e5e0d8; border-radius: 8px; overflow: hidden; padding: 20px;">
+        <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80" alt="Sofa" style="width: 100%; height: auto; object-fit: cover; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST STRIP -->
+<div class="wrap" style="max-width: 1200px; margin: 0 auto; padding: 0 15px;">
+  <section class="trust" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; padding: 40px 0; margin-bottom: 50px;">
+    <div class="trust-item" style="text-align: center;">
+      <i class="fa fa-truck" style="font-size: 24px; margin-bottom: 10px; color: #111;"></i>
+      <b style="display: block; font-size: 14px; margin-bottom: 5px; font-weight: 700;">Free Shipping</b>
+      <span style="font-size: 12px; color: #777;">Orders over Rs. 5,000</span>
+    </div>
+    <div class="trust-item" style="text-align: center;">
+      <i class="fa fa-headset" style="font-size: 24px; margin-bottom: 10px; color: #111;"></i>
+      <b style="display: block; font-size: 14px; margin-bottom: 5px; font-weight: 700;">24×7 Support</b>
+      <span style="font-size: 12px; color: #777;">Always here to help</span>
+    </div>
+    <div class="trust-item" style="text-align: center;">
+      <i class="fa fa-undo" style="font-size: 24px; margin-bottom: 10px; color: #111;"></i>
+      <b style="display: block; font-size: 14px; margin-bottom: 5px; font-weight: 700;">Money Returns</b>
+      <span style="font-size: 12px; color: #777;">Easy returns</span>
+    </div>
+    <div class="trust-item" style="text-align: center;">
+      <i class="fa fa-percent" style="font-size: 24px; margin-bottom: 10px; color: #111;"></i>
+      <b style="display: block; font-size: 14px; margin-bottom: 5px; font-weight: 700;">Order Discount</b>
+      <span style="font-size: 12px; color: #777;">Save on bulk orders</span>
+    </div>
+  </section>
+</div>
+
+<!-- CATEGORY GRID -->
+<section class="container" style="max-width: 1200px; margin: 60px auto; padding: 0 15px;">
+  <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 30px 20px; text-align: center;">
+    {% for c in categories|slice:":10" %}
+    <a href="{% url 'shop:category' c.slug %}" style="text-decoration: none; color: #111; display: block; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+      <div style="width: 100%; aspect-ratio: 1 / 1; overflow: hidden; margin-bottom: 15px; background: #f8f8f8;">
+        {% if c.image %}
+          <img src="{{ c.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+        {% else %}
+          {% if "Sofa" in c.name or "Living" in c.name %}
+            <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80" style="width: 100%; height: 100%; object-fit: cover;">
+          {% elif "Bed" in c.name or "Mattress" in c.name %}
+            <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=500&q=80" style="width: 100%; height: 100%; object-fit: cover;">
+          {% elif "Dining" in c.name %}
+            <img src="https://images.unsplash.com/photo-1617806118233-18e1de247200?w=500&q=80" style="width: 100%; height: 100%; object-fit: cover;">
+          {% elif "Office" in c.name or "Study" in c.name %}
+            <img src="https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=500&q=80" style="width: 100%; height: 100%; object-fit: cover;">
+          {% elif "Storage" in c.name or "Cabinet" in c.name or "TV" in c.name %}
+            <img src="https://images.unsplash.com/photo-1615873968403-89e068629265?w=500&q=80" style="width: 100%; height: 100%; object-fit: cover;">
+          {% elif "Light" in c.name or "Decor" in c.name %}
+            <img src="https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=500&q=80" style="width: 100%; height: 100%; object-fit: cover;">
+          {% else %}
+            <img src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=500&q=80" style="width: 100%; height: 100%; object-fit: cover;">
+          {% endif %}
+        {% endif %}
+      </div>
+      <h4 style="font-size: 14px; letter-spacing: 0.5px; font-weight: 500; text-transform: uppercase; color: #333; margin: 0;">{{ c.name }}</h4>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- DEAL OF THE DAY -->
+<section class="section" style="padding: 40px 0;">
+  <div class="wrap" style="max-width: 1200px; margin: 0 auto; padding: 0 15px;">
+    <p class="section-label" style="text-align: center; font-size: 20px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 30px;">Deal of the Day</p>
+    <div class="grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+      {% for p in featured|slice:":4" %}
+        <article class="card" style="text-align: center;">
+          <a href="{% url 'shop:product_detail' p.slug %}" class="product-link" style="text-decoration: none; color: #111;">
+            <div class="card-img" style="background: #f9f9f9; height: 250px; border-radius: 4px; overflow: hidden; margin-bottom: 15px; position: relative;">
+              {% if p.old_price %}<span class="tag tag-sale" style="position: absolute; top: 10px; left: 10px; background: #d32f2f; color: #fff; padding: 3px 8px; font-size: 10px; font-weight: bold; border-radius: 3px;">-{{ p.discount_percent }}%</span>
+              {% elif p.badge %}<span class="tag" style="position: absolute; top: 10px; left: 10px; background: #111; color: #fff; padding: 3px 8px; font-size: 10px; font-weight: bold; border-radius: 3px;">{{ p.badge }}</span>{% endif %}
+              {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+              {% else %}<img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80" alt="{{ p.name }}" style="width: 100%; height: 100%; object-fit: cover;">{% endif %}
+            </div>
+            <h3 style="font-size: 16px; font-weight: 500; margin-bottom: 5px;">{{ p.name }}</h3>
+            <p class="cat-name" style="font-size: 11px; color: #777; text-transform: uppercase; margin-bottom: 10px;">{{ p.category.name }}</p>
+          </a>
+          <div class="price-row" style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+            <div class="price"><strong style="font-size: 14px;">Rs. {{ p.price }}</strong>{% if p.old_price %}<s style="color: #999; font-size: 12px; margin-left: 5px;">Rs. {{ p.old_price }}</s>{% endif %}</div>
+            <a href="{% url 'shop:add_to_cart' p.id %}" class="add" style="background: #111; color: #fff; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; text-decoration: none;">+</a>
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty" style="grid-column: span 4; text-align: center;">No featured products available.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- SPLIT PROMO BANNERS -->
+<section class="container" style="max-width: 1200px; margin: 40px auto; padding: 0 15px;">
+  <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="promo-split-card" style="background: linear-gradient(135deg, #fdfbf7 0%, #f5e6d3 100%); border-radius: 8px; overflow: hidden; display: flex; height: 350px;">
+      <div style="width: 60%; padding: 30px;">
+        <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; color: #666;">THIS FESTIVE SEASON</span>
+        <h2 style="font-size: 32px; line-height: 1.1; margin-top: 10px; font-weight: 700; color: #111;">Buy More.<br><span style="color: #c94a24;">Save More.</span></h2>
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 20px; font-size: 12px; color: #333; font-weight: 500;"><span>On 2nd Product</span> <strong style="color: #c94a24;">5% OFF</strong></div>
+          <div style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 20px; font-size: 12px; color: #333; font-weight: 500;"><span>On 3rd Product</span> <strong style="color: #c94a24;">7% OFF</strong></div>
+          <div style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 20px; font-size: 12px; color: #333; font-weight: 500;"><span>On 4th Product</span> <strong style="color: #c94a24;">10% OFF</strong></div>
+          <div style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 20px; font-size: 12px; color: #333; font-weight: 500;"><span>On 5th Product</span> <strong style="color: #c94a24;">12% OFF</strong></div>
+        </div>
+      </div>
+      <div style="width: 40%; position: relative;"><img src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600&q=80" style="width: 100%; height: 100%; object-fit: cover;" alt="Sofa"></div>
+    </div>
+    <div class="promo-split-card" style="background: linear-gradient(135deg, #8c867a 0%, #5e584f 100%); border-radius: 8px; overflow: hidden; display: flex; height: 350px; color: white;">
+      <div style="width: 50%; padding: 30px; display: flex; flex-direction: column; justify-content: center;">
+        <span style="font-size: 12px; color: #e0dcd3;">Buy a Mattress & Get</span>
+        <h2 style="font-size: 42px; margin: 10px 0; color: white; line-height: 1;">2 FREE<br>Pillows!</h2>
+        <div style="background: #c94a24; color: #fff; display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; align-self: flex-start; margin-top: 10px;">145 Night Trial*</div>
+      </div>
+      <div style="width: 50%; position: relative;"><img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80" style="width: 100%; height: 100%; object-fit: cover;" alt="Bed"></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOT PRODUCTS -->
+<section class="section" style="padding: 60px 0;">
+  <div class="wrap" style="max-width: 1200px; margin: 0 auto; padding: 0 15px;">
+    <p class="section-label" style="text-align: center; font-size: 20px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 30px;">Hot Products</p>
+    <div class="grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+      {% for p in featured|slice:"4:12" %}
+        <article class="card" style="text-align: center;">
+          <a href="{% url 'shop:product_detail' p.slug %}" class="product-link" style="text-decoration: none; color: #111;">
+            <div class="card-img" style="background: #f9f9f9; height: 250px; border-radius: 4px; overflow: hidden; margin-bottom: 15px;">
+              {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+              {% else %}<img src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=500&q=80" alt="{{ p.name }}" style="width: 100%; height: 100%; object-fit: cover;">{% endif %}
+            </div>
+            <h3 style="font-size: 16px; font-weight: 500; margin-bottom: 5px;">{{ p.name }}</h3>
+            <p class="cat-name" style="font-size: 11px; color: #777; text-transform: uppercase; margin-bottom: 10px;">{{ p.category.name }}</p>
+          </a>
+          <div class="price-row" style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+            <div class="price"><strong style="font-size: 14px;">Rs. {{ p.price }}</strong></div>
+            <a href="{% url 'shop:add_to_cart' p.id %}" class="add" style="background: #111; color: #fff; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; text-decoration: none;">+</a>
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty" style="grid-column: span 4; text-align: center;">More products will appear here when available.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section class="section" style="padding: 40px 0; background: #f9f9f9;">
+  <div class="wrap" style="max-width: 1200px; margin: 0 auto; padding: 0 15px;">
+    <p class="section-label" style="text-align: center; font-size: 24px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 30px;">Latest Insights of NM Traders</p>
+    <div class="blog-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+      <article class="post-entry" style="background: #fff; border-radius: 8px; overflow: hidden;">
+        <a href="#" class="post-thumbnail"><img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600" alt="Interior design" style="width: 100%; height: 200px; object-fit: cover;"></a>
+        <div class="post-content-entry" style="padding: 20px;">
+          <p class="meta" style="font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Interior Design</p>
+          <h3 style="font-size: 20px; margin-bottom: 10px;">How to Choose the Right Office Chair</h3>
+          <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Comfort meets productivity. Learn what to look for when shopping.</p>
+          <a href="#" class="more" style="font-size: 12px; font-weight: 600; color: #111; text-decoration: none; border-bottom: 1px solid #111; padding-bottom: 2px;">Read More →</a>
+        </div>
+      </article>
+      <article class="post-entry" style="background: #fff; border-radius: 8px; overflow: hidden;">
+        <a href="#" class="post-thumbnail"><img src="https://images.unsplash.com/photo-1567016432779-094069958ea5?w=600" alt="Bedroom furniture" style="width: 100%; height: 200px; object-fit: cover;"></a>
+        <div class="post-content-entry" style="padding: 20px;">
+          <p class="meta" style="font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Bedroom Guide</p>
+          <h3 style="font-size: 20px; margin-bottom: 10px;">Bed Buying Guide: Size, Style and Comfort</h3>
+          <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Explore furniture choices to make your bedroom more comfortable.</p>
+          <a href="#" class="more" style="font-size: 12px; font-weight: 600; color: #111; text-decoration: none; border-bottom: 1px solid #111; padding-bottom: 2px;">Read More →</a>
+        </div>
+      </article>
+      <article class="post-entry" style="background: #fff; border-radius: 8px; overflow: hidden;">
+        <a href="#" class="post-thumbnail"><img src="https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600" alt="Modern home furniture" style="width: 100%; height: 200px; object-fit: cover;"></a>
+        <div class="post-content-entry" style="padding: 20px;">
+          <p class="meta" style="font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Home Inspiration</p>
+          <h3 style="font-size: 20px; margin-bottom: 10px;">Furniture That Combines Style and Function</h3>
+          <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Find ideas for creating a stylish and practical living space.</p>
+          <a href="#" class="more" style="font-size: 12px; font-weight: 600; color: #111; text-decoration: none; border-bottom: 1px solid #111; padding-bottom: 2px;">Read More →</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="section" style="padding: 60px 0;">
+  <div class="wrap" style="max-width: 1200px; margin: 0 auto; padding: 0 15px;">
+    <div class="news" style="background: #111; color: #fff; padding: 40px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+      <div class="news-content">
+        <h2 style="font-size: 28px; margin-bottom: 8px;">Subscribe to Our Newsletter</h2>
+        <p style="font-size: 14px; color: #aaa;">Get the latest deals, new arrivals and furniture tips.</p>
+      </div>
+      <form method="post" action="{% url 'shop:newsletter' %}" style="display: flex; gap: 10px;">
+        {% csrf_token %}
+        <input type="email" name="email" placeholder="Enter your email" required style="padding: 12px 20px; border-radius: 4px; border: none; width: 250px; outline: none;">
+        <button class="btn btn-green" type="submit" style="background: #c98a3d; color: #fff; border: none; padding: 12px 24px; border-radius: 4px; font-weight: 600; cursor: pointer;">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer" style="padding: 60px 0 20px; background: #fff; border-top: 1px solid #eee;">
+  <div class="wrap footer-inner" style="max-width: 1200px; margin: 0 auto; padding: 0 15px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 30px;">
+    <div class="footer-about">
+      <p class="footer-brand" style="font-size: 28px; font-weight: 700; color: #111; margin-bottom: 15px;">{{ site.site_name|default:"NM Traders" }}</p>
+      <p style="color: #666; font-size: 13px; line-height: 1.6; margin-bottom: 20px;">Quality furniture for every room in your home.</p>
+      <div class="social" style="display: flex; gap: 15px;">
+        <a href="{{ site.facebook|default:'#' }}" aria-label="Facebook" style="color: #111; font-size: 18px;"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="{{ site.instagram|default:'#' }}" aria-label="Instagram" style="color: #111; font-size: 18px;"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="YouTube" style="color: #111; font-size: 18px;"><i class="fa-brands fa-youtube"></i></a>
+      </div>
+    </div>
+    <div>
+      <strong style="display: block; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Quick Links</strong>
+      <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 2;">
+        <li><a href="{% url 'shop:home' %}" style="color: #666; text-decoration: none;">Home</a></li>
+        <li><a href="{% url 'shop:product_list' %}" style="color: #666; text-decoration: none;">Shop</a></li>
+        <li><a href="#" style="color: #666; text-decoration: none;">About Us</a></li>
+        <li><a href="#" style="color: #666; text-decoration: none;">Contact Us</a></li>
+      </ul>
+    </div>
+    <div>
+      <strong style="display: block; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Account</strong>
+      <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 2;">
+        <li>ul><a href="{% url 'shop:cart' %}" style="color: #666; text-decoration: none;">My Cart</a></li>
+       

@@ -1,0 +1,97 @@
+{% extends 'admin_panel/admin_base.html' %}
+
+{% block title %}Products{% endblock %}
+{% block page_header %}Products{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .btn-add { background: var(--primary); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-add:hover { background: var(--primary-hover); }
+  
+  .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th { background: #fcfcfc; padding: 14px 24px; font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 16px 24px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 14px; }
+  tr:last-child td { border-bottom: none; }
+  
+  .product-cell { display: flex; align-items: center; gap: 16px; }
+  .product-thumb { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; background: #f0f0f0; border: 1px solid var(--border); }
+  .product-info h4 { margin: 0; font-weight: 600; color: var(--text); font-size: 14px; }
+  .product-info p { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+  
+  .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+  .badge-green { background: #e8f5e9; color: #2e7d32; }
+  .badge-red { background: #ffebee; color: #c62828; }
+  
+  .action-btns { display: flex; gap: 12px; }
+  .action-btns a { color: var(--muted); font-size: 16px; transition: color 0.2s; }
+  .action-btns a:hover { color: var(--primary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2 style="font-size: 20px; font-weight: 600;">All Products</h2>
+  <a href="{% url 'shop:admin_product_add' %}" class="btn-add">
+    <i class="fa-solid fa-plus"></i> Add Product
+  </a>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Product Name</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>
+          <div class="product-cell">
+            {% if p.image %}
+              <img src="{{ p.image.url }}" class="product-thumb" alt="{{ p.name }}">
+            {% else %}
+              <div class="product-thumb" style="display:grid;place-items:center;"><i class="fa-regular fa-image" style="color:#ccc;"></i></div>
+            {% endif %}
+            <div class="product-info">
+              <h4>{{ p.name }}</h4>
+              <p>SKU: NM-{{ p.id|stringformat:"04d" }}</p>
+            </div>
+          </div>
+        </td>
+        <td>{{ p.category.name }}</td>
+        <td>Rs. {{ p.price }}</td>
+        <td>{{ p.stock }}</td>
+        <td>
+          {% if p.is_active and p.stock > 0 %}
+            <span class="badge badge-green">Active</span>
+          {% else %}
+            <span class="badge badge-red">Out of Stock</span>
+          {% endif %}
+        </td>
+        <td>
+          <div class="action-btns">
+            <a href="{% url 'shop:product_detail' p.slug %}" target="_blank" title="View on Store"><i class="fa-regular fa-eye"></i></a>
+            <a href="#" title="Edit"><i class="fa-solid fa-pen"></i></a>
+            <a href="#" title="Delete" style="color: #dc3545;"><i class="fa-regular fa-trash-can"></i></a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 40px; color: var(--muted);">
+          No products found. <a href="{% url 'shop:admin_product_add' %}" style="color: var(--accent);">Add your first product</a>.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

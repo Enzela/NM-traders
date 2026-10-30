@@ -1,0 +1,36 @@
+{% extends 'admin_panel/admin_base.html' %}
+
+{% block title %}Payment QR{% endblock %}
+{% block page_header %}Payment QR Code{% endblock %}
+
+{% block extra_css %}
+<style>
+  .qr-container { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 30px; max-width: 500px; text-align: center; }
+  .qr-preview { max-width: 200px; border-radius: 8px; margin: 20px auto; display: block; border: 1px solid #eee; padding: 10px; }
+  .file-input { border: 1px dashed var(--border); padding: 20px; border-radius: 6px; background: #fafafa; cursor: pointer; display: block; margin-bottom: 20px; }
+  .btn-submit { background: var(--primary); color: #fff; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="qr-container">
+  <h3>Scan to Pay (eSewa / Khalti)</h3>
+  <p style="color: var(--muted); font-size: 14px;">Upload the QR code image that customers should scan.</p>
+
+  {% if qr %}
+    <img src="{{ qr.qr_image.url }}" class="qr-preview" alt="Current QR Code">
+    <p style="color: green; font-size: 13px;"><i class="fa fa-check-circle"></i> QR Code is currently active on the storefront.</p>
+  {% else %}
+    <div style="padding: 40px; background: #f9f9f9; border-radius: 8px; margin-bottom: 20px;">
+      <i class="fa fa-qrcode" style="font-size: 40px; color: #ccc;"></i>
+      <p style="color: var(--muted); margin-top: 10px;">No QR code uploaded yet.</p>
+    </div>
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="qr_image" accept="image/*" required class="file-input">
+    <button type="submit" class="btn-submit">Upload / Replace QR Code</button>
+  </form>
+</div>
+{% endblock %}

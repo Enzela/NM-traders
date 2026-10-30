@@ -1,0 +1,139 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+    {% if search_query %}Search: {{ search_query }}
+    {% elif category %}{{ category.name }}
+    {% else %}Shop{% endif %} — {{ site.site_name|default:"NM Traders" }}
+  </title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="wrap topbar-inner">
+    <p>{{ site.topbar_text|default:"Free delivery on orders over Rs. 5,000" }}</p>
+    <span><i class="fa fa-phone"></i> {{ site.phone|default:"+977 9800000000" }}</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a href="{% url 'shop:home' %}" class="logo">
+      <span class="logo-mark">NM</span>
+      <span class="logo-text">{{ site.site_name|default:"NM Traders" }}<small>Furniture Store</small></span>
+    </a>
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+    <label for="menu-toggle" class="menu-btn">Menu</label>
+    <div class="menu">
+      <a href="{% url 'shop:home' %}">Home</a>
+      <a href="{% url 'shop:product_list' %}" class="on">Shop</a>
+      {% for c in nav_categories %}
+        <a href="{% url 'shop:category' c.slug %}">{{ c.name }}</a>
+      {% endfor %}
+    </div>
+    
+    <!-- WORKING SEARCH BAR -->
+    <div class="search d-flex align-items-center">
+      <form action="{% url 'shop:product_list' %}" method="GET" class="d-flex align-items-center m-0">
+        <!-- value="{{ search_query }}" makes sure the search bar remembers what you typed -->
+        <input type="search" name="q" value="{{ search_query|default:'' }}" placeholder="Search furniture…" class="search-input">
+        <button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
+      </form>
+      <a href="{% url 'shop:cart' %}" class="cart-pill">Cart <b>{{ cart_count|default:0 }}</b></a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO TITLE -->
+<section class="hero small-hero">
+  <div class="wrap">
+    <h1>
+      {% if search_query %}
+        Search Results for "{{ search_query }}"
+      {% elif category %}
+        {{ category.name }}
+      {% else %}
+        All Products
+      {% endif %}
+    </h1>
+    <p class="lead">
+      {% if search_query %}
+        Found {{ products.count }} product(s) matching your search.
+      {% elif category %}
+        Browse all products in {{ category.name }}.
+      {% else %}
+        Browse our full collection.
+      {% endif %}
+    </p>
+  </div>
+</section>
+
+<!-- PRODUCTS LIST -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>
+        {% if search_query %}Results{% elif category %}{{ category.name }}{% else %}All Products{% endif %}
+      </h2>
+      <a href="{% url 'shop:home' %}" class="link">← Back Home</a>
+    </div>
+
+    <div class="grid">
+      {% for p in products %}
+        <div class="card">
+          <a href="{% url 'shop:product_detail' p.slug %}" style="color:inherit;text-decoration:none;">
+            <div class="card-img">
+              {% if p.old_price %}<span class="tag tag-sale">-{{ p.discount_percent }}%</span>
+              {% elif p.badge %}<span class="tag">{{ p.badge }}</span>{% endif %}
+              {% if p.image %}
+                <img src="{{ p.image.url }}" alt="{{ p.name }}">
+              {% else %}
+                <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80" alt="{{ p.name }}">
+              {% endif %}
+            </div>
+            <h3>{{ p.name }}</h3>
+            <p class="cat-name">{{ p.category.name }}</p>
+          </a>
+          <div class="price-row">
+            <div class="price">
+              <strong>Rs. {{ p.price }}</strong>
+              {% if p.old_price %}<s>Rs. {{ p.old_price }}</s>{% endif %}
+            </div>
+            <a href="{% url 'shop:add_to_cart' p.id %}" class="add">+</a>
+          </div>
+        </div>
+      {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px 0;">
+          <p style="font-size: 18px; color: #666;">No products found matching your search.</p>
+          <a href="{% url 'shop:product_list' %}" class="btn btn-light" style="margin-top: 15px;">View All Products</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div>
+      <p class="footer-brand">{{ site.site_name|default:"NM Traders" }}<span>.</span></p>
+      <p>Premium furniture for every room.</p>
+    </div>
+    <div>
+      <strong>Get in Touch</strong>
+      <p>📞 {{ site.phone|default:"+977 9800000000" }}</p>
+    </div>
+  </div>
+  <div class="copyright">© {% now "Y" %} {{ site.site_name|default:"NM Traders" }}.</div>
+</footer>
+
+</body>
+</html>
